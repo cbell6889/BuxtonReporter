@@ -2,7 +2,6 @@ import {initializeBlock, Input} from '@airtable/blocks/ui';
 import React from 'react';
 import {Box, Select, Label, Button, useBase, useRecords} from '@airtable/blocks/ui'
 import {useState, useEffect} from 'react';
-import { format } from "date-fns";
 
 const updateRecords = (data) => {
     let sDate;
