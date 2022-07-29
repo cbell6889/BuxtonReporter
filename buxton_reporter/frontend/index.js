@@ -25,6 +25,8 @@ function BuxtonReporter() {
     const [totalNoqualEnquiry, setNoqualEnquiry] = useState(0)
     const [buyerPurposes, setBuyerPurposes] = useState(lotTable.getFieldByName("Purchase Purpose").options["choices"].reduce((a,v) => ({...a, [v["name"]]: 0}),{}))
 
+
+
     const parseEnquiryRecords = () => {
 
         let data = {
@@ -34,6 +36,7 @@ function BuxtonReporter() {
             "noqualEnquiry": 0,
             "buyerPurposes": lotTable.getFieldByName("Purchase Purpose").options["choices"].reduce((a,v) => ({...a, [v["name"]]: 0}),{})
         }
+
 
         for (let rec of lotRecords){
 
@@ -60,6 +63,8 @@ function BuxtonReporter() {
         setNoqualEnquiry(data["noqualEnquiry"])
 
         setBuyerPurposes(data["buyerPurposes"])
+
+
     }
 
     const monthOptions = [
@@ -124,6 +129,7 @@ function BuxtonReporter() {
                         <SummaryCard key={i} countColour="Blue" recordCount={buyerPurposes[keyName]} recordTitle={keyName} />
                         ))}
                 </Box>
+
             </Box>
 
         </React.Fragment>
