@@ -10,14 +10,23 @@ function BuxtonReporter() {
     const base = useBase()
     const enquiryTable = base.getTableByName("All Enquiries")
     const lotTable = base.getTableByName("Lot Activity")
+    const progTable = base.getTableByName("ProgressTable")
     const enquiryView = enquiryTable.getViewByName("APIView")
     const lotView = lotTable.getViewByName("APIView")
+    const progView = progTable.getViewByName("All View")
     const enquiryRecords = useRecords(enquiryView)
     const lotRecords = useRecords(lotView)
+    const progRecords = useRecords(progView)
 
     const [selectedMonthView, setSelectedMonthView] = useState(currentDate.getMonth())
     const [selectedYearView, setSelectedYearView] = useState(currentDate.getFullYear())
     const [selectedYearOnlyView, setSelectedYearOnlyView] = useState(false)
+
+    const [contractsIn, setContractsIn] = useState(0)
+    const [contractsOut, setContractsOut] = useState(0)
+    const [contractsHold, setContractsHold] = useState(0)
+
+
 
     const [totalEnquiry, setTotalEnquiry] = useState(0)
     const [totalQualEnquiry, setQualEnquiry] = useState(0)
@@ -25,11 +34,19 @@ function BuxtonReporter() {
     const [totalNoqualEnquiry, setNoqualEnquiry] = useState(0)
     const [buyerPurposes, setBuyerPurposes] = useState(lotTable.getFieldByName("Purchase Purpose").options["choices"].reduce((a,v) => ({...a, [v["name"]]: 0}),{}))
 
-
+    const updateProgressTable = () => {
+        for (let rec of progRecords) {
+            console.log(selectedMonthView.toString() + "-" + selectedYearView.toString())
+            progTable.updateRecordAsync(rec,{"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())})
+        }
+    }
 
     const parseEnquiryRecords = () => {
-
+        updateProgressTable()
         let data = {
+            "contractsIn": 0,
+            "contractsOut": 0,
+            "contractsHold": 0,
             "totalEnquiry": 0,
             "qualEnquiry": 0,
             "unqualEnquiry": 0,
@@ -41,10 +58,19 @@ function BuxtonReporter() {
         for (let rec of lotRecords){
 
             let dte = new Date(rec.getCellValue("Contracts Fully Signed"))
+            let status = rec.getCellValueAsString("Status")
             if (dte.getFullYear() === selectedYearView && (dte.getMonth() === selectedMonthView || selectedYearOnlyView)){
                 console.log(data["buyerPurposes"])
                 data["buyerPurposes"][rec.getCellValueAsString("Purchase Purpose")] = data["buyerPurposes"][rec.getCellValueAsString("Purchase Purpose")] + 1
+
+                data["contractsIn"] = status === "Sold - Fully Signed" ? data["contractsIn"] + 1 : data["contractsIn"]
+                data["contractsIn"] = status === "Sold - Purchaser Signed" ? data["contractsIn"] + 1 : data["contractsIn"]
+                data["contractsIn"] = status === "Settled" ? data["contractsIn"] + 1 : data["contractsIn"]
             }
+            data["contractsOut"] = status === "Contracts Out" ? data["contractsOut"] + 1 : data["contractsOut"]
+            data["contractsHold"] = status === "Hold" ? data[contractsHold] + 1 : data["contractsHold"]
+
+
         }
 
         for (let rec of enquiryRecords){
@@ -57,6 +83,10 @@ function BuxtonReporter() {
                 data["noqualEnquiry"] = (enqStatus === "Qualified" && enqStatus === "Unqualified") ? data["noqualEnquiry"] + 1 : data["noqualEnquiry"]
             }
         }
+        setContractsIn(data["contractsIn"])
+        setContractsOut(data["contractsOut"])
+        setContractsHold(data["contractsHold"])
+
         setTotalEnquiry(data["totalEnquiry"])
         setQualEnquiry(data["qualEnquiry"])
         setUnqualEnquiry(data["unqualEnquiry"])
@@ -119,16 +149,21 @@ function BuxtonReporter() {
             </Box>
             <Box>
                 <Box display={"flex"} flexWrap={"nowrap"} justifyContent={"space-between"}>
-                    <SummaryCard countColour="blue" recordCount={totalEnquiry} recordTitle={"Total Enquiries"} />
-                    <SummaryCard countColour="green" recordCount={totalQualEnquiry} recordTitle={"Qualified Enquiry"} />
-                    <SummaryCard countColour="orange" recordCount={totalUnqualEnquiry} recordTitle={"Unqualified Enquiry"} />
-                    <SummaryCard countColour="red" recordCount={totalNoqualEnquiry} recordTitle={"Unknown Qualification"} />
+                    <SummaryCard countColour="green" recordCount={contractsIn} recordTitle={"Contracts Signed"} />
+                    <SummaryCard countColour="red" recordCount={contractsOut} recordTitle={"Contracts Out (Current)"} />
+                    <SummaryCard countColour="orange" recordCount={contractsHold} recordTitle={"Hold (Current)"} />
                 </Box>
-                <Box display={"flex"} flexWrap={"nowrap"} justifyContent={"space-between"}>
-                    {Object.keys(buyerPurposes).map((keyName, i) => (
-                        <SummaryCard key={i} countColour="Blue" recordCount={buyerPurposes[keyName]} recordTitle={keyName} />
-                        ))}
-                </Box>
+                {/*<Box display={"flex"} flexWrap={"nowrap"} justifyContent={"space-between"}>*/}
+                {/*    <SummaryCard countColour="blue" recordCount={totalEnquiry} recordTitle={"Total Enquiries"} />*/}
+                {/*    <SummaryCard countColour="green" recordCount={totalQualEnquiry} recordTitle={"Qualified Enquiry"} />*/}
+                {/*    <SummaryCard countColour="orange" recordCount={totalUnqualEnquiry} recordTitle={"Unqualified Enquiry"} />*/}
+                {/*    <SummaryCard countColour="red" recordCount={totalNoqualEnquiry} recordTitle={"Unknown Qualification"} />*/}
+                {/*</Box>*/}
+                {/*<Box display={"flex"} flexWrap={"nowrap"} justifyContent={"space-between"}>*/}
+                {/*    {Object.keys(buyerPurposes).map((keyName, i) => (*/}
+                {/*        <SummaryCard key={i} countColour="Blue" recordCount={buyerPurposes[keyName]} recordTitle={keyName} />*/}
+                {/*        ))}*/}
+                {/*</Box>*/}
 
             </Box>
 
