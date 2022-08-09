@@ -34,10 +34,20 @@ function BuxtonReporter() {
     const [totalNoqualEnquiry, setNoqualEnquiry] = useState(0)
     const [buyerPurposes, setBuyerPurposes] = useState(lotTable.getFieldByName("Purchase Purpose").options["choices"].reduce((a,v) => ({...a, [v["name"]]: 0}),{}))
 
-    const updateProgressTable = () => {
-        for (let rec of progRecords) {
+    const updateProgressTable = async () => {
+        // for (let rec of progRecords) {
+        //     console.log(selectedMonthView.toString() + "-" + selectedYearView.toString())
+        //     progTable.updateRecordAsync(rec,{"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())})
+        // }
+        let recArray = []
+        for (let rec of enquiryRecords) {
             console.log(selectedMonthView.toString() + "-" + selectedYearView.toString())
-            progTable.updateRecordAsync(rec,{"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())})
+            await recArray.push({"id": rec.id, "fields": {"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())}})
+
+        }
+        for (let i = 0; i < Math.ceil(recArray.length/50.0); i ++)
+        {
+            await enquiryTable.updateRecordsAsync(recArray.slice(i*50,(i+1)*50))
         }
     }
 
@@ -148,11 +158,11 @@ function BuxtonReporter() {
                 <Button marginLeft={3} icon={"bolt"} onClick={() => parseEnquiryRecords()}>Update Data</Button>
             </Box>
             <Box>
-                <Box display={"flex"} flexWrap={"nowrap"} justifyContent={"space-between"}>
-                    <SummaryCard countColour="green" recordCount={contractsIn} recordTitle={"Contracts Signed"} />
-                    <SummaryCard countColour="red" recordCount={contractsOut} recordTitle={"Contracts Out (Current)"} />
-                    <SummaryCard countColour="orange" recordCount={contractsHold} recordTitle={"Hold (Current)"} />
-                </Box>
+                {/*<Box display={"flex"} flexWrap={"nowrap"} justifyContent={"space-between"}>*/}
+                {/*    <SummaryCard countColour="green" recordCount={contractsIn} recordTitle={"Contracts Signed"} />*/}
+                {/*    <SummaryCard countColour="red" recordCount={contractsOut} recordTitle={"Contracts Out (Current)"} />*/}
+                {/*    <SummaryCard countColour="orange" recordCount={contractsHold} recordTitle={"Hold (Current)"} />*/}
+                {/*</Box>*/}
                 {/*<Box display={"flex"} flexWrap={"nowrap"} justifyContent={"space-between"}>*/}
                 {/*    <SummaryCard countColour="blue" recordCount={totalEnquiry} recordTitle={"Total Enquiries"} />*/}
                 {/*    <SummaryCard countColour="green" recordCount={totalQualEnquiry} recordTitle={"Qualified Enquiry"} />*/}
