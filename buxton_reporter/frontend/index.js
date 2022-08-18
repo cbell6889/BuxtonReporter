@@ -49,6 +49,24 @@ function BuxtonReporter() {
         {
             await enquiryTable.updateRecordsAsync(recArray.slice(i*50,(i+1)*50))
         }
+
+
+        recArray = []
+        for (let rec of lotRecords) {
+            console.log(selectedMonthView.toString() + "-" + selectedYearView.toString())
+            let arr = []
+            rec.getCellValueAsString("HoldMonthYear") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString()) ? arr.push({"name":"Hold"}) : null
+            rec.getCellValueAsString("OutMonthYear") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString()) ? arr.push({"name":"Contracts Out"}) : null
+            rec.getCellValueAsString("SignedMonthYear") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString()) ? arr.push({"name":"Sold – Fully Signed"}) : null
+            console.log(arr)
+            await recArray.push({"id": rec.id, "fields": {"APIGraphHelper": arr}})
+
+        }
+        for (let i = 0; i < Math.ceil(recArray.length/50.0); i ++)
+        {
+            await lotTable.updateRecordsAsync(recArray.slice(i*50,(i+1)*50))
+        }
+
     }
 
     const parseEnquiryRecords = () => {
