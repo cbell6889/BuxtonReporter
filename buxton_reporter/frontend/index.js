@@ -11,12 +11,15 @@ function BuxtonReporter() {
     const enquiryTable = base.getTableByName("All Enquiries")
     const lotTable = base.getTableByName("Lot Activity")
     const progTable = base.getTableByName("ProgressTable")
+    const histTable = base.getTableByName("LotHistory")
     const enquiryView = enquiryTable.getViewByName("APIView")
     const lotView = lotTable.getViewByName("APIView")
     const progView = progTable.getViewByName("All View")
+    const histView = histTable.getViewByName("All View")
     const enquiryRecords = useRecords(enquiryView)
     const lotRecords = useRecords(lotView)
     const progRecords = useRecords(progView)
+    const histRecords = useRecords(histView)
 
     const [selectedMonthView, setSelectedMonthView] = useState(currentDate.getMonth())
     const [selectedYearView, setSelectedYearView] = useState(currentDate.getFullYear())
@@ -35,10 +38,14 @@ function BuxtonReporter() {
     const [buyerPurposes, setBuyerPurposes] = useState(lotTable.getFieldByName("Purchase Purpose").options["choices"].reduce((a,v) => ({...a, [v["name"]]: 0}),{}))
 
     const updateProgressTable = async () => {
-        // for (let rec of progRecords) {
-        //     console.log(selectedMonthView.toString() + "-" + selectedYearView.toString())
-        //     progTable.updateRecordAsync(rec,{"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())})
-        // }
+        for (let rec of progRecords) {
+            console.log(selectedMonthView.toString() + "-" + selectedYearView.toString())
+            progTable.updateRecordAsync(rec,{"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())})
+        }
+        for (let rec of histRecords) {
+            console.log(selectedMonthView.toString() + "-" + selectedYearView.toString())
+            histTable.updateRecordAsync(rec,{"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())})
+        }
         let recArray = []
         for (let rec of enquiryRecords) {
             console.log(selectedMonthView.toString() + "-" + selectedYearView.toString())
