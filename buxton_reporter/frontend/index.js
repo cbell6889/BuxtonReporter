@@ -29,7 +29,7 @@ function BuxtonReporter() {
     const [contractsOut, setContractsOut] = useState(0)
     const [contractsHold, setContractsHold] = useState(0)
 
-
+    let sleepTime = 1
 
     const [totalEnquiry, setTotalEnquiry] = useState(0)
     const [totalQualEnquiry, setQualEnquiry] = useState(0)
@@ -38,17 +38,57 @@ function BuxtonReporter() {
     const [buyerPurposes, setBuyerPurposes] = useState(lotTable.getFieldByName("Purchase Purpose").options["choices"].reduce((a,v) => ({...a, [v["name"]]: 0}),{}))
 
     const updateProgressTable = async () => {
-        for (let rec of progRecords) {
-            console.log(selectedMonthView.toString() + "-" + selectedYearView.toString())
-            progTable.updateRecordAsync(rec,{"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())})
-        }
-        for (let rec of histRecords) {
-            console.log(selectedMonthView.toString() + "-" + selectedYearView.toString())
-            histTable.updateRecordAsync(rec,{"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())})
-        }
+        // for (let rec of progRecords) {
+        //     console.log("A - " + selectedMonthView.toString() + "-" + selectedYearView.toString())
+        //     await new Promise(r => setTimeout(r, sleepTime));
+        //     progTable.updateRecordAsync(rec,{"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())})
+        // }
+        // for (let rec of histRecords) {
+        //     console.log("B - " + selectedMonthView.toString() + "-" + selectedYearView.toString())
+        //     await new Promise(r => setTimeout(r, sleepTime));
+        //     histTable.updateRecordAsync(rec,{"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())})
+        // }
+        // for (let rec of lotRecords) {
+        //     console.log("C - " + selectedMonthView.toString() + "-" + selectedYearView.toString())
+        //     await new Promise(r => setTimeout(r, sleepTime));
+        //     histTable.updateRecordAsync(rec,{"CurrentView": rec.getCellValueAsString("SignedMonthYear") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())})
+        // }
         let recArray = []
+        for (let rec of progRecords) {
+            console.log("A - " + selectedMonthView.toString() + "-" + selectedYearView.toString())
+            await recArray.push({"id": rec.id, "fields": {"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())}})
+
+        }
+        for (let i = 0; i < Math.ceil(recArray.length/50.0); i ++)
+        {
+            await progTable.updateRecordsAsync(recArray.slice(i*50,(i+1)*50))
+        }
+
+        recArray = []
+        for (let rec of histRecords) {
+            console.log("B - " + selectedMonthView.toString() + "-" + selectedYearView.toString())
+            await recArray.push({"id": rec.id, "fields": {"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())}})
+
+        }
+        for (let i = 0; i < Math.ceil(recArray.length/50.0); i ++)
+        {
+            await histTable.updateRecordsAsync(recArray.slice(i*50,(i+1)*50))
+        }
+
+        recArray = []
+        for (let rec of lotRecords) {
+            console.log("C - " + selectedMonthView.toString() + "-" + selectedYearView.toString())
+            await recArray.push({"id": rec.id, "fields": {"CurrentView": rec.getCellValueAsString("SignedMonthYear") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())}})
+
+        }
+        for (let i = 0; i < Math.ceil(recArray.length/50.0); i ++)
+        {
+            await lotTable.updateRecordsAsync(recArray.slice(i*50,(i+1)*50))
+        }
+
+        recArray = []
         for (let rec of enquiryRecords) {
-            console.log(selectedMonthView.toString() + "-" + selectedYearView.toString())
+            console.log("D - " + selectedMonthView.toString() + "-" + selectedYearView.toString())
             await recArray.push({"id": rec.id, "fields": {"CurrentView": rec.getCellValueAsString("Month-Year") === ((selectedMonthView+1).toString() + "-" + selectedYearView.toString())}})
 
         }
@@ -71,6 +111,7 @@ function BuxtonReporter() {
         }
         for (let i = 0; i < Math.ceil(recArray.length/50.0); i ++)
         {
+            await new Promise(r => setTimeout(r, sleepTime));
             await lotTable.updateRecordsAsync(recArray.slice(i*50,(i+1)*50))
         }
 
